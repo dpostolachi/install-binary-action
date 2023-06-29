@@ -1,6 +1,9 @@
 const core = require('@actions/core');
 const exec = require('@actions/exec');
 const tc = require('@actions/tool-cache');
+const os = require('os');
+
+const isMacOS = () => os.platform() === 'darwin'
 
 async function run() {
 
@@ -44,7 +47,7 @@ async function installTool(name, version, url, stripComponents, wildcard) {
   const path = await tc.downloadTool(url);
 
   await exec.exec(`mkdir ${name}`)
-  await exec.exec(`tar -C ${name} -xzvf ${path} --strip-components ${stripComponents} --wildcards ${wildcard}`)
+  await exec.exec(`tar -C ${name} -xzvf ${path} --strip-components ${stripComponents} ${ isMacOS ? '' : ' --wildcards ' }${wildcard}`)
 
   cachedPath = await tc.cacheDir(name, name, version);
   core.addPath(cachedPath)
